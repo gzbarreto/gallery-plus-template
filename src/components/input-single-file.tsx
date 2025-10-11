@@ -41,12 +41,16 @@ interface InputSingleFileProps
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   form: any
   error?: React.ReactNode
+  allowedExtensions: string[]
+  maxFileSizeInMB: number
 }
 
 export default function InputSingleFile({
   form,
   size,
   error,
+  allowedExtensions,
+  maxFileSizeInMB,
   ...props
 }: InputSingleFileProps) {
   const formValues = useWatch({ control: form.control })
@@ -55,10 +59,29 @@ export default function InputSingleFile({
     () => formValues[name]?.[0],
     [formValues, name]
   )
+  const { fileExtension, fileSize } = useMemo(
+    () => ({
+      fileExtension: formFile?.name?.split(".").pop()?.toLowerCase() || "",
+      fileSize: formFile?.size || 0,
+    }),
+    [formFile]
+  )
+
+  function isValidExtension() {
+    return allowedExtensions.includes(fileExtension)
+  }
+
+  function isValidSize() {
+    return fileSize <= maxFileSizeInMB * 1024 * 1024
+  }
+
+  function isValidFile() {
+    return isValidExtension() && isValidSize()
+  }
 
   return (
     <div>
-      {!formFile ? (
+      {!formFile || !isValidFile() ? (
         <>
           <div className="w-full relative group cursor-pointer">
             <input
@@ -80,12 +103,24 @@ export default function InputSingleFile({
               </Text>
             </div>
           </div>
+          <div className="flex flex-col gap-1 mt-1">
+            {formFile && !isValidExtension() && (
+              <Text variant="label-small" className="text-accent-red">
+                Tipo de arquivo inválido
+              </Text>
+            )}
 
-          {error && (
-            <Text variant="label-small" className="text-accent-red">
-              Erro no campo
-            </Text>
-          )}
+            {formFile && !isValidSize() && (
+              <Text variant="label-small" className="text-accent-red">
+                O tamanho do arquivo ultrapassa o tamanho máximo permitido
+              </Text>
+            )}
+            {error && (
+              <Text variant="label-small" className="text-accent-red">
+                {error}
+              </Text>
+            )}
+          </div>
         </>
       ) : (
         <>
