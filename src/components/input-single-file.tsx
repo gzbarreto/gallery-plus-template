@@ -43,6 +43,7 @@ interface InputSingleFileProps
   error?: React.ReactNode
   allowedExtensions: string[]
   maxFileSizeInMB: number
+  replaceBy: React.ReactNode
 }
 
 export default function InputSingleFile({
@@ -51,6 +52,7 @@ export default function InputSingleFile({
   error,
   allowedExtensions,
   maxFileSizeInMB,
+  replaceBy,
   ...props
 }: InputSingleFileProps) {
   const formValues = useWatch({ control: form.control })
@@ -124,6 +126,7 @@ export default function InputSingleFile({
         </>
       ) : (
         <>
+          {replaceBy}
           <div
             className={`
         flex gap-3 items-center 
