@@ -1,9 +1,19 @@
 import Container from "../components/container"
+import AlbumsFilter from "../contexts/albums/components/albums-filter"
 import PhotosList from "../contexts/photos/components/photos-list"
 
 export default function PageHome() {
   return (
     <Container>
+      <AlbumsFilter
+        // loading
+        albums={[
+          { id: "123", title: "hello" },
+          { id: "456", title: "world" },
+          { id: "789", title: "cat" },
+        ]}
+        className="mb-9"
+      />
       <PhotosList
         photos={[
           {
