@@ -7,20 +7,19 @@ import PhotosNavigator from "../contexts/photos/components/photos-navigator"
 import ImagePreview from "../components/image-preview"
 import Button from "../components/button"
 import AlbumsListSelectable from "../contexts/albums/components/albums-list-selectable"
+import useAlbums from "../contexts/albums/hooks/use-albums"
 
 export default function PagePhotoDetails() {
   const { id } = useParams()
+  const { albums, isLoadingAlbums } = useAlbums()
+
   //const apenas para teste do mock
   const isLoadginPhoto = false
   const photo = {
     id: "aaaaaa",
     title: "hello world",
     imageId: "portrait-tower.png",
-    albums: [
-      { id: "123", title: "hello" },
-      { id: "456", title: "world" },
-      { id: "789", title: "cat" },
-    ],
+    albums: albums,
   } as Photo
 
   return (
@@ -59,12 +58,8 @@ export default function PagePhotoDetails() {
 
           <AlbumsListSelectable
             photo={photo}
-            loading={isLoadginPhoto}
-            albums={[
-              { id: "123", title: "hello" },
-              { id: "456", title: "world" },
-              { id: "789", title: "cat" },
-            ]}
+            loading={isLoadingAlbums}
+            albums={albums}
           />
         </div>
       </div>

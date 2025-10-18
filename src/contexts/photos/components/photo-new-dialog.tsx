@@ -12,9 +12,9 @@ import Alert from "../../../components/alert"
 import InputSingleFile from "../../../components/input-single-file"
 import ImagePreview from "../../../components/image-preview"
 import Text from "../../../components/text"
-import type { Album } from "../../albums/models/album"
 import Skeleton from "../../../components/skeleton"
 import { useForm } from "react-hook-form"
+import useAlbums from "../../albums/hooks/use-albums"
 
 interface PhotoNewDialogProps {
   trigger: React.ReactNode
@@ -22,13 +22,7 @@ interface PhotoNewDialogProps {
 
 export default function PhotoNewDialog({ trigger }: PhotoNewDialogProps) {
   const form = useForm()
-  //mock de dados
-  const isLoadingAlbums = false
-  const albums: Album[] = [
-    { id: "123", title: "hello" },
-    { id: "456", title: "world" },
-    { id: "789", title: "cat" },
-  ]
+  const { albums, isLoadingAlbums } = useAlbums()
 
   return (
     <Dialog>
