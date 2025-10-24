@@ -17,7 +17,8 @@ import usePhotos from "../../photos/hooks/use-photos"
 import { useForm } from "react-hook-form"
 import { albumNewFormSchema, type AlbumNewFormSchema } from "../schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
+import useAlbum from "../hooks/use-album"
 
 interface AlbumNewDialogProps {
   trigger: React.ReactNode
@@ -26,10 +27,13 @@ interface AlbumNewDialogProps {
 export default function AlbumNewDialog({ trigger }: AlbumNewDialogProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const { photos, isLoadingPhotos } = usePhotos()
+  const { createAlbum } = useAlbum()
+  const [isCreatingAlbum, setIsCreatingAlbum] = useTransition()
+
   const form = useForm<AlbumNewFormSchema>({
     resolver: zodResolver(albumNewFormSchema),
   })
-  
+
   //reseta o formulario quando fecha o modal
   useEffect(() => {
     if (!modalOpen) {
@@ -38,11 +42,23 @@ export default function AlbumNewDialog({ trigger }: AlbumNewDialogProps) {
   }, [modalOpen, form])
 
   function handelTogglePhoto(selected: boolean, photoId: string) {
-    console.log("selected photo: ", photoId, selected)
+    const photosIds = form.getValues("photosIds") || []
+    let newValue = []
+
+    if (selected) {
+      newValue = [...photosIds, photoId]
+    } else {
+      newValue = photosIds.filter((id) => id !== photoId)
+    }
+
+    form.setValue("photosIds", newValue)
   }
 
   function handleSubmit(payload: AlbumNewFormSchema) {
-    console.log(payload)
+    setIsCreatingAlbum(async () => {
+      await createAlbum(payload)
+      setModalOpen(false)
+    })
   }
 
   return (
@@ -106,9 +122,17 @@ export default function AlbumNewDialog({ trigger }: AlbumNewDialogProps) {
 
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant="secondary">Cancelar</Button>
+              <Button disabled={isCreatingAlbum} variant="secondary">
+                Cancelar
+              </Button>
             </DialogClose>
-            <Button type="submit">Criar álbum</Button>
+            <Button
+              disabled={isCreatingAlbum}
+              handling={isCreatingAlbum}
+              type="submit"
+            >
+              {isCreatingAlbum ? "Criando..." : "Criar"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
