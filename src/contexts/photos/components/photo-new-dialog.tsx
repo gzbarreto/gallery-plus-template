@@ -17,12 +17,15 @@ import { useForm } from "react-hook-form"
 import useAlbums from "../../albums/hooks/use-albums"
 import { photoNewFormSchema, type PhotoNewFormSchema } from "../schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 
 interface PhotoNewDialogProps {
   trigger: React.ReactNode
 }
 
 export default function PhotoNewDialog({ trigger }: PhotoNewDialogProps) {
+  const [modalOpen, setModalOpen] = useState(false)
+
   const form = useForm<PhotoNewFormSchema>({
     resolver: zodResolver(photoNewFormSchema),
   })
@@ -31,12 +34,33 @@ export default function PhotoNewDialog({ trigger }: PhotoNewDialogProps) {
   const file = form.watch("file")
   const fileSrc = file?.[0] ? URL.createObjectURL(file[0]) : undefined
 
+  const albumsIds = form.watch("albumsIds")
+
+  useEffect(() => {
+    if (!modalOpen) {
+      form.reset()
+    }
+  }, [modalOpen, form])
+
+  function handleToggleAlbum(albumId: string) {
+    const albumsIds = form.getValues("albumsIds") || []
+    const albumSet = new Set(albumsIds)
+  
+    if (albumSet.has(albumId)) {
+      albumSet.delete(albumId)
+    } else {
+      albumSet.add(albumId)
+    }
+
+    form.setValue("albumsIds", Array.from(albumSet))
+  }
+
   function handleSubmit(payload: PhotoNewFormSchema) {
     console.log(payload)
   }
 
   return (
-    <Dialog>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -72,8 +96,9 @@ export default function PhotoNewDialog({ trigger }: PhotoNewDialogProps) {
                     <Button
                       key={album.id}
                       className="truncate"
-                      variant="ghost"
+                      variant={albumsIds?.includes(album.id) ? "primary" : "ghost"}
                       size="sm"
+                      onClick={() => handleToggleAlbum(album.id)}
                     >
                       {album.title}
                     </Button>
